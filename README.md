@@ -64,6 +64,55 @@ __Subscriber__
 4. Start listening for the topic messages  
 5. Spin to listen forever (in C++)  
 
+## Create Custom ROS Message
+Defined by two thing: package_name/message_type (ie. std_msgs/String, geometry_msgs/Twist).  
+Every ROS Message has some content which is defined by the type and field that has a value respect to its type. (ie. std_msgs/String message content is string data, with string being the type and field being the data.)  
+__Steps to Create a New ROS Message__:  
+1. create a msg folder in your package
+2. create the message file with the file extension .msg
+3. edit the message file by adding the elements (one per line)
+4. Update the dependencies in package.xml and CMakeLists.txt
+5. compile the package using catkin_make
+6. make sure that your message is created using `rosmsg show`. 
+
+Example from video: IoTSensor Message  
+Message contents: id, name, temperature, humidity  
+1. When creating the ros msg folder, make sure it's in the package folder and not anywhere else. (ie. ros_essentials_cpp)  
+2. create the msg file IoTSensor.msg in the msg folder  
+3. Updating dependencies: in package.xml, make sure the following are included: `<build_depend>message_generation</build_depend>` and `<exec_depend>message_runtime</exec_depend>`.  
+In the CMakeLists.txt file, make sure the following is done: in find_package() add message_generation, in add_message_files() add IoTSensor.msg, in catkin_package() add message_runtime, and generate_messages is uncommented. 
+
+## ROS Services
+### What is a ROS Service?
+1. ROS Server: the node that will provide the service  
+2. ROS Client: the node that will consume the service  
+Not like topic, service is __one-time__ communication. A client sends a request, then the server sends back a response.  
+
+### When to use a ROS Service?
+1. Request the robot to perform a _specific_ action (ie. path planning from point A to point B, spawn one robot in the simulator.)
+
+### ROS Service line commands
+`$ rosservice list`: lists all the services that are available
+`$ rosservice info /name_of_service`: returns 
+```
+Node: name of the node that provides the service
+URI: where the service is located on your system  
+Type: the type of the message  
+Args: the argument; when the client sends the request, it must send whatever arguments they must send.
+```
+`$ rossrv info Type`: ie. `$rossrv info turtlesim/Spawn`, returns the structure of the message. For example, `$rossrv info turtlesim/Spawn` will return:  
+```
+float32 x
+float32 y
+float32 theta
+string name  
+---  
+string name
+```
+The arguments that the client needs to put down is on the upper half, and what the server will return is the lower half.  
+__Example of using a service__:  
+`$ rosservice call /spawn 7 7 180 t2`  
+returns: `name: "t2"`
 
  
 
