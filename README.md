@@ -112,7 +112,37 @@ string name
 The arguments that the client needs to put down is on the upper half, and what the server will return is the lower half.  
 __Example of using a service__:  
 `$ rosservice call /spawn 7 7 180 t2`  
-returns: `name: "t2"`
+returns: `name: "t2"`  
+
+### Steps to Write a ROS Service
+The client will send a Request Message and the server will send back a Response Message.  
+1. Define the service message (service file): will define the type of the message for the service request, and the type of the message for the service response. 
+2. Create ROS Server node  
+3. Create the ROS Client node: sends the request message and waits for the response message  
+4. Execute the service  
+5. Consume the service by the client  
+
+For example:  
+<ol> In ros_essentials_cpp, create a folder named 'srv'. In the srv folder, create a file called AddTwoInts.srv. In that file, we will define the type of message for the service request and response. It should look like the following:  
+```
+int64 a
+int64 b
+---
+int64 sum
+```
+Go to package.xml and make sure the following is added:  
+`<build_depend>message_generation</build_depend>` and `<exec_depend>message_runtime</exec_depend>`. These modules are responsible for reading the service file and converting it into source code for C++ and Python. 
+Go to CMakeLists.txt and make sure you have:  
+in `find_package` have message_generation  
+in `add_service_files()` define the service file. ie. AddTwoInts.srv.
+
+For that service file, we can find where it is created in: `~/catkin_ws/devel/include/ros_essentials_cpp`. 
+__How to verify that your ROS service is working__: `rossrv list`  to see all the services created. 
+</ol>
+<ol>
+	
+</ol>
+
 
  
 
