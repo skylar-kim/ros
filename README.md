@@ -166,6 +166,8 @@ from ros_essentials_cpp.srv import AddTwoIntsRequest
 from ros_essentials_cpp.srv import AddTwoIntsResponse
 ```
 The `AddTwoIntsRequest` and `AddTwoIntsResponse` is in the devel folder when we compile the package.  
+The rest of the comments are in the `add_client.py` program.  
+__Note__: When you run `$ rosrun ros_essentials_cpp add_two_ints_server` (which is the cpp server) and `$ rosrun ros_essentials_cpp add_client.py 7 9` the client/server still works even though the programs are written in different languages. This is possible because they exchange serialized messages. 
 
 
 
