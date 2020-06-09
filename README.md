@@ -141,13 +141,31 @@ __How to verify that your ROS service is working__: `rossrv list`  to see all th
 
 2. Write ROS Service (Client/Server) in Python
 __Server__: When writing a server, we will write something similar to a callback function for a subscriber node, which is known as a _handle_ function that is going to process the incomming message, formulate the response, and sends back the response to the client.  
-Primary function (in add_server.py)
+__Primary function__ (in add_server.py): `add_two_ints_server('name of service', type of message to exchange, )`  
+`rospy.Service`: creates a server that will be listening to incoming requests  
+At the beginning of a python file, make sure to add the following so that we can access the service and messages defined for this service:
+```python
+from ros_essentials_cpp.srv import AddTwoInts
+from ros_essentials_cpp.srv import AddTwoIntsRequest
+from ros_essentials_cpp.srv import AddTwoIntsResponse
+```
+The `AddTwoIntsRequest` and `AddTwoIntsResponse` is in the devel folder when we compile the package.  
+__Handle Function__: performs the service requested 
+```python
+def handle_add_two_ints(req):
+    print "Returning [%s + %s = %s]"%(req.a, req.b, (req.a + req.b))
+    # returns the response, contains only 1 argument
+    return AddTwoIntsResponse(req.a + req.b) 
+```
 
-
-
- 
-
-
+__Client__: sends the request to the server for the service  
+At the beginning of a python file, make sure to add the following so that we can access the service and messages defined for this service:
+```python
+from ros_essentials_cpp.srv import AddTwoInts
+from ros_essentials_cpp.srv import AddTwoIntsRequest
+from ros_essentials_cpp.srv import AddTwoIntsResponse
+```
+The `AddTwoIntsRequest` and `AddTwoIntsResponse` is in the devel folder when we compile the package.  
 
 
 
