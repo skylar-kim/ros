@@ -123,7 +123,7 @@ The client will send a Request Message and the server will send back a Response 
 5. Consume the service by the client  
 
 For example:  
-<ol> In ros_essentials_cpp, create a folder named 'srv'. In the srv folder, create a file called AddTwoInts.srv. In that file, we will define the type of message for the service request and response. It should look like the following:  
+<ol>1. In ros_essentials_cpp, create a folder named 'srv'. In the srv folder, create a file called AddTwoInts.srv. In that file, we will define the type of message for the service request and response. It should look like the following:  
 ```
 int64 a
 int64 b
@@ -139,7 +139,8 @@ in `add_service_files()` define the service file. ie. AddTwoInts.srv.
 For that service file, we can find where it is created in: `~/catkin_ws/devel/include/ros_essentials_cpp`. 
 __How to verify that your ROS service is working__: `rossrv list`  to see all the services created. 
 </ol>
-<ol>
+<ol>2. Write ROS Service (Client/Server) in Python
+	
 	
 </ol>
 
