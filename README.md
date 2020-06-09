@@ -1,5 +1,6 @@
 # ROS: Robot Operating System
-
+### How to add an existing project to GitHub using the command line:
+(https://help.github.com/en/github/importing-your-projects-to-github/adding-an-existing-project-to-github-using-the-command-line)
 ### ROS Workspace and ROS Package Notes
 If you create a new workspace called `catkin_ws` in the path /home/user and use ROS Kinetic version, what is the command to execute to enable the workspace you created?  
 `source /home/user/catkin_ws/devel/setup.bash`
@@ -164,7 +165,7 @@ At the beginning of a python file, make sure to add the following so that we can
 from ros_essentials_cpp.srv import AddTwoInts
 from ros_essentials_cpp.srv import AddTwoIntsRequest
 from ros_essentials_cpp.srv import AddTwoIntsResponse
-```
+```ros
 The `AddTwoIntsRequest` and `AddTwoIntsResponse` is in the devel folder when we compile the package.  
 The rest of the comments are in the `add_client.py` program.  
 __Note__: When you run `$ rosrun ros_essentials_cpp add_two_ints_server` (which is the cpp server) and `$ rosrun ros_essentials_cpp add_client.py 7 9` the client/server still works even though the programs are written in different languages. This is possible because they exchange serialized messages. 
