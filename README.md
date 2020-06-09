@@ -123,7 +123,7 @@ The client will send a Request Message and the server will send back a Response 
 5. Consume the service by the client  
 
 For example:  
-<ol>1. In ros_essentials_cpp, create a folder named 'srv'. In the srv folder, create a file called AddTwoInts.srv. In that file, we will define the type of message for the service request and response. It should look like the following:  
+1. In ros_essentials_cpp, create a folder named 'srv'. In the srv folder, create a file called AddTwoInts.srv. In that file, we will define the type of message for the service request and response. It should look like the following:  
 ```
 int64 a
 int64 b
@@ -131,18 +131,18 @@ int64 b
 int64 sum
 ```
 Go to package.xml and make sure the following is added:  
-`<build_depend>message_generation</build_depend>` and `<exec_depend>message_runtime</exec_depend>`. These modules are responsible for reading the service file and converting it into source code for C++ and Python. 
+`<build_depend>message_generation</build_depend>` and `<exec_depend>message_runtime</exec_depend>`. These modules are responsible for reading the service file and converting it into source code for C++ and Python.   
 Go to CMakeLists.txt and make sure you have:  
 in `find_package` have message_generation  
 in `add_service_files()` define the service file. ie. AddTwoInts.srv.
 
-For that service file, we can find where it is created in: `~/catkin_ws/devel/include/ros_essentials_cpp`. 
+For that service file, we can find where it is created in: `~/catkin_ws/devel/include/ros_essentials_cpp`.   
 __How to verify that your ROS service is working__: `rossrv list`  to see all the services created. 
-</ol>
-<ol>2. Write ROS Service (Client/Server) in Python
-	
-	
-</ol>
+
+2. Write ROS Service (Client/Server) in Python
+__Server__: When writing a server, we will write something similar to a callback function for a subscriber node, which is known as a _handle_ function that is going to process the incomming message, formulate the response, and sends back the response to the client.  
+Primary function (in add_server.py)
+
 
 
  
