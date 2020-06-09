@@ -165,14 +165,81 @@ At the beginning of a python file, make sure to add the following so that we can
 from ros_essentials_cpp.srv import AddTwoInts
 from ros_essentials_cpp.srv import AddTwoIntsRequest
 from ros_essentials_cpp.srv import AddTwoIntsResponse
-```ros
+```
 The `AddTwoIntsRequest` and `AddTwoIntsResponse` is in the devel folder when we compile the package.  
 The rest of the comments are in the `add_client.py` program.  
 __Note__: When you run `$ rosrun ros_essentials_cpp add_two_ints_server` (which is the cpp server) and `$ rosrun ros_essentials_cpp add_client.py 7 9` the client/server still works even though the programs are written in different languages. This is possible because they exchange serialized messages. 
 
+### Writing the turtlesim cleaner
 
+Cleaning Application Overview (need these methods):  
+```c++
+void move(double speed, double distance, bool isForward);
+void rotate(double angular_speed, double angle, bool clockwise);
+double degrees2radians(double angle_in_degrees);
+void poseCallback(const turtlesim::Pose::ConstPtr &pose_message);
+double setAbsoluteOrientation(double desired_angle);
+// double clean();
+double getDistance(double x1, double y1, double x2, double y2);
+// void moveGoal(turtlesim::Post goal_pose, double distance_tolerate);
+```
+How all ROS nodes should start:  
+```c++
+#include "ros/ros.h"
 
+int main(int argc, char **argv) 
+{
+	ros::init(argc, argv, "robot_cleaner");
+	ros::NodeHandle n;
 
+	return 0;
+}
+```
+In order to implement speed, must publish the messages. But first, must find what what messages to publish and where:  
+`$ rosrun turtlesim turtlesim_node`
+`$ rostopic list`  
+/turtle1/cmd_vel: this is the topic that makes the robot move  
+`$ rostopic info /turtle1/cmd_vel` :   
+Type: geometry_msgs/Twist (this is the type of message is published to the /cmd_vel topic)  
+`$ rosmsg show geometry_msgs/Twist`: show what the message type contains  
+```
+geometry_msgs/Vector3 linear  
+  float64 x
+  float64 y  
+  float64 z  
+geometry_msgs/Vector3 angular  
+  float64 x
+  float64 y  
+  float64 z  
+```
+So, we must publish Twist message in order to make the turtlesim move.  
+The rest of the notes are on `robot_cleaner.cpp`. Here are some further, non-code, but still important notes:  
+When you compile with `catkin_make`, you will not be able to run the program (or even compile successfully).  
+In your __CMakeLists.txt__: 
+```
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES turtlesim_cleaner
+  CATKIN_DEPENDS other_catkin_pkg roscpp rospy std_msgs geometry_msgs message_runtime
+#  DEPENDS system_lib
+)
+...
+## Declare a cpp executable
+add_executable(robot_cleaner_node src/robot_cleaner.cpp)
+target_link_libraries(robot_cleaner_node ${catkin_LIBARIES})
+add_dependencies(robot_cleaner_node beginner_tutorials_gencpp)
+```
+In your package.xml file:  
+```xml
+<build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
 
-
-
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+```
