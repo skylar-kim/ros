@@ -286,3 +286,77 @@ When the ROS master node is terminated on the Robot Machine, and you try to run 
 If you did all those steps and the test communication above, and you get an error, try the following:  
 [VMware PLayer Bridged Network not Working](https://www.youtube.com/watch?v=fheU2ER9tss)  
 Do this configuration for both the User Workstation VM and the Robot Machine VM
+
+### Launch File
+What is a Launch file?  
+- __launch file__: is a xml document, which specifies: which nodes to execute, their parameters, what other launch files to include. Has a .launch extension  
+- __roslaunch__: is a program that easily launches multiple ROS nodes  
+
+#### How to write a launch file: 
+First, create a launch directory in the package you are working in. For example, if you are working in the `turtlesim_cleaner` package, then you type the following into the terminal:  
+` user@ubuntu:~/catkin_ws/src/turtlesim_cleaner$ mkdir launch` 
+` user@ubuntu:~/catkin_ws/src/turtlesim_cleaner/launch$ touch clean_py.launch` 
+```xml
+<launch>
+  <node pkg="turtlesim" type="turtlesim_node" name="turtlesim_node" output="screen"/>
+  <node pkg="turtlesim" type="turtle_teleop_key" name="turtlesim_teleop_node" output="screen"/>
+  <node pkg="turtlesim_cleaner" type="clean.py" name="clean" output="screen"/>
+```
+`pkg`: specifies the package name that the node is under  
+`type`: name of the executable file. For c++ files, the formatting is like the first two nodes, for python scripts, the formatting is like the last node.  
+`name`: a custom name that we can specify for that node  
+
+To use the launch file, compile your workspace using `$ catkin_make` and launch it by `$ roslaunch package_name launch_file_name.launch`  
+
+#### Putting a Launch File Within a Launch File:  
+Let's say we are creating another launch file called `launch_all.launch` and it will have the launch file we already made, `clean_py.launch` and another node. The format will look like the following
+```xml
+<launch>
+  <include file="$(find turtlesim_cleaner)/launch/clean_py.launch"/>
+  <node pkg="ros_essentials_cpp" type="turtlesim_cleaner.py" name="turtlesim_cleaner_node_py"/>
+</launch>
+```
+The `find` command will return the absolute path of turtlesim_cleaner (or whwatever other package you put there) and then further specify the path of the launch file within the package.  
+
+#### Parameters in Launch Files:
+
+If you want to have parameters in your nodes, then you must do the following:  
+1. In the launch file, define the parameters _BEFORE_ the node is called so that they are registered in the parameter server. Also, make sure to add `output="screen"` to see the print statements. 
+```xml
+<launch>
+  <include file="$(find turtlesim_cleaner)/launch/clean_py.launch"/>
+  <param name="x_goal" value="2.0"/>
+  <param name="y_goal" value="3.0"/>
+  <node pkg="ros_essentials_cpp" type="turtlesim_cleaner.py" name="turtlesim_cleaner_node_py" output="screen"/>
+</launch>
+```
+2. In the package src code, define the parameters. For example, if you wanted to use parameters in `turtlesim_cleaner.py`, define as follows:
+```python
+if __name__ == '__main__':
+    try:
+        
+        rospy.init_node('turtlesim_motion_pose', anonymous=True)
+
+        #declare velocity publisher
+        cmd_vel_topic='/turtle1/cmd_vel'
+        velocity_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+        
+        position_topic = "/turtle1/pose"
+        pose_subscriber = rospy.Subscriber(position_topic, Pose, poseCallback) 
+        time.sleep(2)
+
+        #move(1.0, 2.0, False)
+        #rotate(30, 90, True)
+
+        x_goal = rospy.get_param("x_goal")
+        y_goal = rospy.get_param("y_goal")
+
+        print('x_goal = ', x_goal)
+        print('y_goal = ', y_goal)
+
+        go_to_goal(x_goal, y_goal) 
+        #setDesiredOrientation(math.radians(90))
+       
+    except rospy.ROSInterruptException:
+        rospy.loginfo("node terminated.")
+```
