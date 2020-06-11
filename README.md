@@ -272,7 +272,7 @@ Find the IP address of the user workstation by typing `$ ifconfig` into the User
 
 Paste the ip address into the .bashrc file in the following format: `export ROS_HOSTNAME= ip address`, `export ROS_IP = ip address`. However, the ROS_MASTER_URI will be different.  
 
-The IP address listed after ROS_MASTER_URI in the .bashrc file will be the ip address found on the Robot Machine. In the .bashrc file, it will look like the following: `export ROS_MASTER_URI = ip address of robot machine` except replace the words "ip address of robot machine" with the actual ip address.  
+The IP address listed after ROS_MASTER_URI in the .bashrc file will be the ip address found on the Robot Machine. In the .bashrc file, it will look like the following: `export ROS_MASTER_URI = http://ip address of robot machine` except replace the words "ip address of robot machine" with the actual ip address.  
 
 #### Communicating between User Workstation and Robot Machine
 1. Run `$ roscore` on the Robot Machine  
@@ -282,3 +282,7 @@ The IP address listed after ROS_MASTER_URI in the .bashrc file will be the ip ad
 
 When the ROS master node is terminated on the Robot Machine, and you try to run `$ rostopic list` on the Robot Machine again, an error message saying `ERROR: Unable to communicate with master!` will pop up. This is because the workstation is no longer connected to the ROS Master of the robot. 
 
+#### VM Configuration
+If you did all those steps and the test communication above, and you get an error, try the following:  
+[VMware PLayer Bridged Network not Working](https://www.youtube.com/watch?v=fheU2ER9tss)  
+Do this configuration for both the User Workstation VM and the Robot Machine VM
