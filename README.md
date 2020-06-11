@@ -244,7 +244,7 @@ In your package.xml file:
   <exec_depend>message_runtime</exec_depend>
 ```
 
-### Network Configuration in ROS
+## Network Configuration in ROS
 Although there is already a guide on Confluence, that is between two physically separate computers.  
 This guide will show how to configure the ROS Network Configuration between 2 VMs, the __User Workstation__ and the __Robot Machine__  
 
@@ -287,12 +287,12 @@ If you did all those steps and the test communication above, and you get an erro
 [VMware PLayer Bridged Network not Working](https://www.youtube.com/watch?v=fheU2ER9tss)  
 Do this configuration for both the User Workstation VM and the Robot Machine VM
 
-### Launch File
+## Launch File
 What is a Launch file?  
 - __launch file__: is a xml document, which specifies: which nodes to execute, their parameters, what other launch files to include. Has a .launch extension  
 - __roslaunch__: is a program that easily launches multiple ROS nodes  
 
-#### How to write a launch file: 
+### How to write a launch file: 
 First, create a launch directory in the package you are working in. For example, if you are working in the `turtlesim_cleaner` package, then you type the following into the terminal:  
 ` user@ubuntu:~/catkin_ws/src/turtlesim_cleaner$ mkdir launch` 
 ` user@ubuntu:~/catkin_ws/src/turtlesim_cleaner/launch$ touch clean_py.launch` 
@@ -308,7 +308,7 @@ First, create a launch directory in the package you are working in. For example,
 
 To use the launch file, compile your workspace using `$ catkin_make` and launch it by `$ roslaunch package_name launch_file_name.launch`  
 
-#### Putting a Launch File Within a Launch File:  
+### Putting a Launch File Within a Launch File:  
 Let's say we are creating another launch file called `launch_all.launch` and it will have the launch file we already made, `clean_py.launch` and another node. The format will look like the following
 ```xml
 <launch>
@@ -318,7 +318,7 @@ Let's say we are creating another launch file called `launch_all.launch` and it 
 ```
 The `find` command will return the absolute path of turtlesim_cleaner (or whwatever other package you put there) and then further specify the path of the launch file within the package.  
 
-#### Parameters in Launch Files:
+### Parameters in Launch Files:
 
 If you want to have parameters in your nodes, then you must do the following:  
 1. In the launch file, define the parameters _BEFORE_ the node is called so that they are registered in the parameter server. Also, make sure to add `output="screen"` to see the print statements. 
@@ -360,3 +360,18 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         rospy.loginfo("node terminated.")
 ```
+
+## OpenCV for ROS
+- Open Source CV library  
+- BSD License  
+- free for both academic and commerical use  
+- C++/Python/Java  
+- Windows, MacOS, Linux, iOS, Android
+- Strong focus on real time (written in C++ and optimized)
+
+__Image Segmentation__: process of partioning a digital image into multiple segmentation, used to locate objects and boundaries (lines, curves, etc) in images  
+__Image Thresholding__: from a grayscale image, thresholding can be used to create binary images, any color above the threshold is white, and any color below is black  
+__Object Detection and Recognition__: detecting instances of semantic objects of a certain class in digital images and videos  
+__Drawing__: draw different shapes (circle, lines, polyglons, etc)  
+__Edge detection__: works by detecting discontinuities in brightness, used for image segmentation and data extraction  
+__Video/Image Input Output__: openCV makes it simple to read/write images or videos  
