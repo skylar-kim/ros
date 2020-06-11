@@ -243,3 +243,42 @@ In your package.xml file:
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
 ```
+
+### Network Configuration in ROS
+Although there is already a guide on Confluence, that is between two physically separate computers.  
+This guide will show how to configure the ROS Network Configuration between 2 VMs, the __User Workstation__ and the __Robot Machine__  
+
+Goal: control the Robot Machine remotely from the User Workstation  
+
+Note: ROS must be installed on both the Robot Machine and the User Workstation  
+
+#### Configuring the Robot Machine
+In the Robot Machine, open the bashrc file: `$ gedit .bashrc`  
+
+In the Robot Machine, we need to add some IP addresses. In order to find out which IP addresses to add, type `$ ifconfig` into the Robot Machine terminal window.  
+
+Copy the IP address that is listed after `inet addr:` and paste it into the .bashrc file in the following format: `export ROS_HOSTNAME= ip address`, `export ROS_IP = ip address`, `export ROS_MASTER_URI=http://localhost:11311`    
+
+Add the next three lines into the Robot Machine .bashrc file to display the environment variables that we have set when you open a new terminal:
+```
+echo "ROS_HOSTNAME: "$ROS_HOSTNAME
+echo "ROS_IP: "$ROS_IP
+echo "ROS_MASTER_URI: "$ROS_MASTER_URI
+```
+#### Configuring the User Workstation: 
+In the User Workstation, open the bashrc file: `$ gedit .bashrc`  
+
+Find the IP address of the user workstation by typing `$ ifconfig` into the User Workstation terminal window. Copy the ip address that's listed after `inet addr:`.  
+
+Paste the ip address into the .bashrc file in the following format: `export ROS_HOSTNAME= ip address`, `export ROS_IP = ip address`. However, the ROS_MASTER_URI will be different.  
+
+The IP address listed after ROS_MASTER_URI in the .bashrc file will be the ip address found on the Robot Machine. In the .bashrc file, it will look like the following: `export ROS_MASTER_URI = ip address of robot machine` except replace the words "ip address of robot machine" with the actual ip address.  
+
+#### Communicating between User Workstation and Robot Machine
+1. Run `$ roscore` on the Robot Machine  
+2. Run `$ rosrun turtlesim turtlesim_node` on the Robot Machine  
+3. Run `$ rostopic list` on the Robot Machine. A list of the available topics should print out.   
+4. Run `$ rostopic list` on the User Workstation. The same list of the available topics should print out. Note: do NOT run `$ roscore` on the User Workstation.  
+
+When the ROS master node is terminated on the Robot Machine, and you try to run `$ rostopic list` on the Robot Machine again, an error message saying `ERROR: Unable to communicate with master!` will pop up. This is because the workstation is no longer connected to the ROS Master of the robot. 
+
