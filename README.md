@@ -399,3 +399,46 @@ Three main encoding:
 See ros_essentials_cpp/src/topic03_perception/image_encoding.py for a walkthrough.  
 
 Teacher summary: In openCV, you can open an image and then transform the image into different encodings.  
+
+### Video Input Streams
+See ros_essentials_cpp/src/topic03_perception/read_video.py for a walkthrough.
+
+### OpenCV: Drawing Shapes and Lines
+See ros_essentials_cpp/src/topic03_perception/image_draw.py for a walkthrough.  
+
+Why drawing is important: in object detection, we can draw a rectangle around the object detected. 
+
+### CvBridge: Bridging Images between OpenCV and ROS 
+In ROS: images are collected from the topics that are published by the drivers of the camera. So how do we bridge ROS and OpenCV?  
+Must create a subscriber in ROS to receive the image and then send the image to OpenCV for further processing. However, _the image files from ROS is not compatible with OpenCV_. Must transform the image from ROS to OpenCV format, and vice versa.  
+
+__CvBridge__: allows conversion from ROS format to OpenCV format and vice versa.  
+
+If you have a USB camera attached, you can run image_pub_sub.py script by doing the following:  `$ rosrun usb_cam usb_cam_node _pixel_format:=yuyv`  
+How to verify if the camera is working: `$ rosrun image_view image_view image:=/usb_cam/image_raw`  
+Then to run the python script: `$ rosrun ros_essentials_cpp image_pub_sub.py`  
+
+Now we can do image processing with ROS and OpenCV! 
+
+### Simple and Adaptive Thresholding in OpenCV
+__Algorithm__: If a pixel value is greater than a threshold it's assigned a certain value and if it's lower than a threshold it's assigned another value  
+
+__Simple thresholding__:`cv2.threshold(gray_image, threshold_value, max_value, threshold_style)`  
+__Adaptive thresholding__: `cv2.adaptive_thresholding(gray_image, max_value, adaptive_method, block_size, constant)` algorithm calculates the threshold for a small region of the image. Different threshold will be calculated for different regions of the same image, better robustness for different lighting conditions.  
+`cv2.ADAPTIVE_THRESH_MEAN_`: threshold value is mean of neighborhood area  
+`cv2.ADAPTIVE_THRESH_GAUSSIAN_C`: threshold value is the weighted sum of neighborhood values where weights are a gaussian window.  
+Block size: decides size of neighborhood area  
+C: constant which is subtracted from the mean or weighted mean calculated  
+
+Thresholding is important in CV, like in contour detection. 
+
+See ros_essentials_cpp/src/topic03_perception/image_thresholding.py for a walkthrough.  
+
+### Color Filtering
+__Color Filtering__: display only a specific color range in the image  
+__Usage__: detection of objects with specific colors  
+__Algorithm__: read image as RGB image, convert image to HSV image, define the upper and lower color ranges, create the mask based on color ranges  
+
+_Why do we use HSV colorspace for color detection/thresholding over RGB?_: HSV is more robust towards external lighting changes
+
+See ros_essentials_cpp/src/topic03_perception/color_filtering.py for a walkthrough.
