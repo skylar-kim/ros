@@ -375,3 +375,27 @@ __Object Detection and Recognition__: detecting instances of semantic objects of
 __Drawing__: draw different shapes (circle, lines, polyglons, etc)  
 __Edge detection__: works by detecting discontinuities in brightness, used for image segmentation and data extraction  
 __Video/Image Input Output__: openCV makes it simple to read/write images or videos  
+
+### Pixels and Image Structure 
+__numpy__ is a scientific library that allows us to represent an image as a data structure and offers a lot of functionality to process multi-dim arrays.  
+
+Whenever you read an image or you get an image in openCV, you can access any of its pixel by manipulating the numpy array.  
+
+```python
+import numpy
+import cv2
+```
+See ros_essentials_cpp/src/topic03_perception/image_structure.py for a walkthrough. 
+
+### Image Encoding
+Three main encoding:  
+- grayscale
+- red, green, blue
+- hue, saturation, value
+<ul>__Hue__: indicates the type of color that we see in a 360 degree format</ul>
+<ul>__Saturation__: an indication of how saturated an individual color is, i.e. is the amount of gray in the color, from 0 to 100%</ul>
+<ul>__Value (brightness)__: the brightness or intensity of the color, from 0-100 percent, where 0 is completely black and 100 is the brightest and reveals the most color</ul>
+
+See ros_essentials_cpp/src/topic03_perception/image_encoding.py for a walkthrough.  
+
+Teacher summary: In openCV, you can open an image and then transform the image into different encodings.  
