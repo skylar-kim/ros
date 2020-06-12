@@ -441,4 +441,16 @@ __Algorithm__: read image as RGB image, convert image to HSV image, define the u
 
 _Why do we use HSV colorspace for color detection/thresholding over RGB?_: HSV is more robust towards external lighting changes
 
-See ros_essentials_cpp/src/topic03_perception/color_filtering.py for a walkthrough.
+See ros_essentials_cpp/src/topic03_perception/color_filtering.py for a walkthrough.  
+
+### Contours
+__Edge detection__: image processing technique for finding the _boundaries of objects within images_  
+- Contours are a curve joining all the continuous points (along the boundary), having same color or intensity  
+- works by detecting discontinuities in brightness  
+__Usage__: useful tool for shape analysis, image segm and object detection/recognition  
+__Algorithm__: read image as RGB image, convert image to _grayscale_ image, convert gray image into binary image, find the contours using `cv2.findContours()` applied on the binary image, process the contours (find its areas, enclosing circle, perimeter, moment, and centroid)  
+
+`RETR_LIST`: simply retries all contours, but doesn't create any parent-child relationship. Parents and kids are equal under this rule, and they are just contours, ie. they all belong to the same hierarchy level.  
+`RETR_EXTERNAL`: if you use this flag, it returns only extreme outer flags. All child contours are left behind. We can say under this law, only the eldest in every family is taken care of.  
+`RETR_CCOMP`: flag retrieves all the contours and arranges them to a 2-level hierarchy. External contours of the object (boundary) are placed in hierarchy-1. Contours of holdes inside object (if any) is placed in hierarchy-2.  
+`RETR_TREE`: retrieves all contours and creates a full family hierarchy list. It tells who is the grandpa, father, son, grandson and so on. 
