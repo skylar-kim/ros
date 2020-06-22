@@ -454,3 +454,162 @@ __Algorithm__: read image as RGB image, convert image to _grayscale_ image, conv
 `RETR_EXTERNAL`: if you use this flag, it returns only extreme outer flags. All child contours are left behind. We can say under this law, only the eldest in every family is taken care of.  
 `RETR_CCOMP`: flag retrieves all the contours and arranges them to a 2-level hierarchy. External contours of the object (boundary) are placed in hierarchy-1. Contours of holdes inside object (if any) is placed in hierarchy-2.  
 `RETR_TREE`: retrieves all contours and creates a full family hierarchy list. It tells who is the grandpa, father, son, grandson and so on. 
+
+### OpenCV Programs in C++
+
+#### Video Input/Output
+1. Must include the following headers in your code:
+```cpp
+#include "opencv2/opencv.hpp"
+
+using namespace cv;
+```
+2. In the main function, have the VideoCapture object to opent the default camera:
+```cpp
+VideoCapture video_capture(0); // open the default camera
+```
+The [Mat](https://docs.opencv.org/trunk/d3/d63/classcv_1_1Mat.html) class defines the structure of the frame and then use the video_capture object to collect the frames:
+```cpp
+ while(true){
+        // structure of frame 
+        Mat frame;
+        video_capure >> frame;
+}
+```
+3. Apply any OpenCV operations on the image:
+```cpp
+cvtColor(frame, gray_image, COLOR_BGR2GRAY);
+GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+Canny(edges, edges, 0, 30, 3);
+```
+4. Unlike Python, we must specify the executable in the CMakeLists.txt file. Make sure to link the OpenCV library:
+```txt
+find_package(OpenCV)
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_executable(read_video_cpp src/topic03_perception/cpp/read_video.cpp)
+target_link_libraries(read_video_cpp ${catkin_LIBRARIES})
+target_link_libraries(read_video_cpp ${OpenCV_LIBRARIES})
+```
+5. Compile with catkin_make, run roscore, and then use rosrun to run the program.
+
+#### Open and Save Images
+1. Import the appropriate OpenCV libraries   
+2. Define an image structure with the Mat class 
+3. Read the image file from a specific path. Here, the absolute path is provided:
+```cpp
+image = imread("/home/skylar/catkin_ws/src/ros_essentials_cpp/src/topic03_perception/images/chess.jpg", CV_LOAD_IMAGE_COLOR);
+```
+If the absolute path is not specified, then must run the node from the same file and same directory it is located. So, it's just better to put the absolute path.  
+4. Display the image with the method `imshow`:
+```cpp
+//DISPLAY image
+namedWindow( "window", CV_WINDOW_AUTOSIZE ); // Create a window for display.
+imshow( "window", image ); // Show our image inside it.
+```
+5. We can also save the image in a different location with `imwrite`:
+```cpp
+//SAVE image
+imwrite("/home/skylar/tmp/copy_image.jpg",image);// it will store the image in name "result.jpg"
+```
+6. As usual, must add the executable to CMakeLists.txt:
+```
+add_executable(open_copy_cpp src/topic03_perception/cpp/open_copy.cpp)
+target_link_libraries(open_copy_cpp ${catkin_LIBRARIES})
+target_link_libraries(open_copy_cpp ${OpenCV_LIBRARIES})
+```
+
+#### CvBridge: Bridging Images between OpenCV and ROS
+As stated before, the images in OpenCV and ROS are in different formats. We need to convert each format to the other in order to use both OpenCV and ROS. Like we did in Python, we will bridge images between OpenCV and ROS in C++.  
+1. Make sure that OpenCV and CvBridge are the most updated versions with `sudo apt-get update` and `sudo apt-get install ros-kinetic-opencv3` and `sudo apt-get install ros-kinetic-cv-bridge`  
+2. Import the appropriate libraries:
+```cpp
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+```
+3. Publishing and Subscribing: The subscription to a topic is NOT done with the node handler (as we have done so before) because we are subscribing not to a topic, but to an image. The ImageTransport object will be used to create a subscriber for the image topic and the publisher for the image topic:
+```cpp
+class ImageConverter
+{
+  ros::NodeHandle nh_;
+  image_transport::ImageTransport it_;
+  image_transport::Subscriber image_sub_;
+  image_transport::Publisher image_pub_;
+
+public:
+  ImageConverter()
+    : it_(nh_)
+  {
+    // Subscribe to input video feed and publish output video feed
+    image_sub_ = it_.subscribe("image", 1,
+      &ImageConverter::imageCallback, this);
+    image_pub_ = it_.advertise("/image_converter/output_video", 1);
+
+    cv::namedWindow(OPENCV_WINDOW);
+  }
+```
+4. Callback function: takes in a pointer to the Image message, and then create a cvbridge object. Converts the message from callback function to openCV frame format (encoding is BGR8)
+```cpp
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+  {
+    cv_bridge::CvImagePtr cv_ptr;
+    try
+    {
+      // converts from ROS format to openCV format
+      cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    }
+```
+5. Display the image in a window and publish it to a topic:
+```cpp
+// Update GUI Window
+cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+cv::waitKey(3);
+
+// Output modified video stream
+// Convert this openCV message to a ROS sensor_msgs::Image message. 
+image_pub_.publish(cv_ptr->toImageMsg());
+```
+5. Add executable to CMakeList.txt: add cv_bridge and image_transport packages to the find_package, and add the executable
+```
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  actionlib_msgs
+  message_generation
+  geometry_msgs
+  turtlesim
+  cv_bridge
+  image_transport
+)
+```
+```
+add_executable(image_pub_sub_cpp src/topic03_perception/cpp/image_pub_sub.cpp)
+target_link_libraries(image_pub_sub_cpp ${catkin_LIBRARIES})
+target_link_libraries(image_pub_sub_cpp ${OpenCV_LIBRARIES})
+```
+6. Compile using catkin_make, and run it by using rosrun
+7. (OPTIONAL) Instead of running each node manually, you can create a launch file to launch several nodes at once. For example:
+```xml
+<launch>
+  <node name="usb_cam_node" pkg="usb_cam" type="usb_cam_node" output="screen">
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="1280"/>
+    <param name="image_height" value="720"/>
+    <param name="pixel_format" value="yuyv"/>
+    <remap from="image" to="/camera/image_raw"/>
+  </node>
+  <node name="image_view_node" pkg="image_view" type="image_view" output="screen" >
+    <remap from="image" to="/usb_camera_node/image_raw"/>
+  </node>
+  <node name="image_pub_sub_cpp" pkg="ros_essentials_cpp" type="image_pub_sub_cpp" pkg="ros_essentials_cpp" output="screen" >
+    <remap from="image" to="/usb_camera_node/image_raw"/>
+  </node>
+  <node name="image_view2_node" pkg="image_view" type="image_view" output="screen" >
+    <remap from="image" to="/image_converter/output_video"/>
+  </node>
+</launch>
+
+```
