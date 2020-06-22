@@ -613,3 +613,32 @@ target_link_libraries(image_pub_sub_cpp ${OpenCV_LIBRARIES})
 </launch>
 
 ```
+
+## Laser Scanners and ROS
+Laser Scanners: device that can measure the distance to obstacles. It uses laser beams and it's used in robotics applications like SLAM, obstacle avoidance, and navigation. Very useful and necessary for building navigation tools.  
+Laser Scanner Characteristics:
+- Minimum angle: start angle of the scan  
+- Maximum angle: end angle of the scan  
+- Angle increment (angular resolution): angular distance between measurements  
+- Time increment: time between measurements  
+- Scan time: time between two scans  
+- Minimum range: minimum observable range value  
+- Maximum range: maximum observable range value  
+- List of ranges: list of all measurements in a scan  
+- List of intensities: list of all intensities in a scan  
+
+### Connecting an RGBD Camera as a Laser Scanner (ASUS Live Pro with ROS Kinetic)
+1. Start the drivers of the RGBD camera by using the Openni Package that comes with ROS:  
+- Make sure that it is installed, and then launch it with `$ roslaunch openni2_launch openni2.launch`.  
+- This will start all the drivers that will be responsible for connecting with the RGBD cameras and extracting info to publish as ROS topics.  
+- Openni is a general driver that works with many commercially available RGBD cameras (ie. Microsoft Kinect) however for ROS Kinetic, the Asus Live Pro camera is the best compatibility. 
+2. Convert Depth Image to Laser Scanner:  
+- When you start the driver, the RGBD camera will publish several types of images such as raw images, compressed images, and depth images which contains the depth information coming from the laser scanner. However, it is necessary to convert the depth camera into scan readings.  
+- The package to do this conversion is:
+```xml
+<launch>
+  <node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan">
+    <remape from="image" to="/camera/depth/image_raw"/>
+  </node>
+</launch>
+```
