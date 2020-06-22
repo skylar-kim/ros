@@ -634,11 +634,20 @@ Laser Scanner Characteristics:
 - Openni is a general driver that works with many commercially available RGBD cameras (ie. Microsoft Kinect) however for ROS Kinetic, the Asus Live Pro camera is the best compatibility. 
 2. Convert Depth Image to Laser Scanner:  
 - When you start the driver, the RGBD camera will publish several types of images such as raw images, compressed images, and depth images which contains the depth information coming from the laser scanner. However, it is necessary to convert the depth camera into scan readings.  
-- The package to do this conversion is:
+- The package to do this conversion is the following. The execution of the node is done in a launch file because we need to remap the image topic to the correct depth image. 
 ```xml
 <launch>
   <node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan">
-    <remape from="image" to="/camera/depth/image_raw"/>
+    <remap from="image" to="/camera/depth/image_raw"/>
   </node>
 </launch>
 ```
+3. Open with rviz and test with rostopic echo  
+4. In your VM Settings under USB Connections, checck to see that the RGBD camera is connected.  
+5. Make sure your system is up to date with `$ sudo apt-get update`  
+6. Install Openni: `$ sudo apt-get install ros-kinetic-openni2-*`  
+7. Start the launch file: `$ roslaunch openni2_launch openni2.launch`  
+8. In order to see all the topics published by the camera, you can use `$ rostopic list`.  
+- `$ rosrun image_view image_view image:=/camera/rgb/image_raw` will open up a window with the camera feed. 
+- `$ rosrun image_view image_view image:=/camera/depth/image_raw` will show the depth video stream  
+9. Rviz: ROS Vizualization is a tool that allows you to visualize different topics. `$ rosrun rviz rviz`
