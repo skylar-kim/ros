@@ -651,3 +651,22 @@ Laser Scanner Characteristics:
 - `$ rosrun image_view image_view image:=/camera/rgb/image_raw` will open up a window with the camera feed. 
 - `$ rosrun image_view image_view image:=/camera/depth/image_raw` will show the depth video stream  
 9. Rviz: ROS Vizualization is a tool that allows you to visualize different topics. `$ rosrun rviz rviz`
+
+### Save Laser Scan Messages Into a Bag File and Replay Them
+__Rosbag__: utility in ROS that allows to record messages published by topics into a file, and them replay them again. This technique is useful to develop and test algorithms and to replay existing scenarios or experiments.  
+For example, if we wanted to record the messages sent from a laser scanner:  
+1. Run ROS Master  
+2. On another terminal, run the urg node: `$ rosrun urg_node urg_node`
+3. On another terminal, run a static transform publisher: `$ rosrun tf static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 1.0 map laser 10`  
+4. On another terminal, make a bagfiles directory: 
+```
+$ cd
+$ mkdir bagfiles
+$ cd bagfiles
+```
+5. Before collecting the files in bagfiles, start rviz in another terminal: `$ rosrun rviz rviz`. Click the Add button at the bottom to add informatio about the Laser Scanner (under LaserScan). Select /scan topic for "Topic". Add the axes frame by going to Add > Axes > OK
+6. Now you can start recording. In `~/bagfiles` terminal, run `$ rosbag record -a` that will record everything. The -a flag records all the messages coming from the active topics.  
+7. In order to stop recording, on the terminal screen that you ran `$ rosbag record -a`, Ctrl+C will stop the recording. Repeat this for all the other terminals, including the driver and the ROS Master.  
+8. In order to replay the bag files, re-run ROS Master, and re-open rviz. There will be no data being shown in rviz because we will load from a bag file.  
+9. In `$ ~/bagfiles` if you do `$ ls` you can see a file with a .bag extension. That is the bag file. We can look at information about the bag file using `$ rosbag info name_of_bagfile.bag`.  
+10. To play the bag file, run `$ rosbag play name_of_bagfile.bag` and go to the rviz screen. Change the "Topic" to /scan to replay the info we just recorded.  
