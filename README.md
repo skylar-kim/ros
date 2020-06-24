@@ -670,3 +670,28 @@ $ cd bagfiles
 8. In order to replay the bag files, re-run ROS Master, and re-open rviz. There will be no data being shown in rviz because we will load from a bag file.  
 9. In `$ ~/bagfiles` if you do `$ ls` you can see a file with a .bag extension. That is the bag file. We can look at information about the bag file using `$ rosbag info name_of_bagfile.bag`.  
 10. To play the bag file, run `$ rosbag play name_of_bagfile.bag` and go to the rviz screen. Change the "Topic" to /scan to replay the info we just recorded.  
+
+### Write a ROS Node as a Subscriber to a Laser Scanner
+1. Start the drivers of the laser scanner  
+2. Make sure that /scan topic is available  
+3. Write a node that subscribes to the /scan topic  
+4. Write a callback function that receives the /scan messages and process them (min, max, average,...)  
+
+Check out scan_subscriber.py in ros_code for an example.
+
+## Rosserial
+__Rosserial__: protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket. Basically a protocol that was designed in order to communicate between ROS and a new hardware.
+__Why Rosserial?__  
+- Integration of micro-controllers and embedded systems into ROS  
+- Adding new embedded hardware (sensors, controllers, etc)  
+- Need for a communication protocol between new hardware and ROS  
+- Without rosserial: re-invent the wheel and new hardware drivers (oof)  
+__What is Rosserial?__  
+- rosserial allows new electronic hardware to directly talk to ROS system  
+- No need for customer drivers and communication protocol (very time consuming)  
+__Rosserial Client Libraries__:
+- different client libraries were developed to get ROS up and running on various systems  
+- __rosserial_client__: generic client-side rosserial implementation. Designed for microcontrollers and it can run on any processor that has ANSI C++ compiler and a serial port connection to a computer running ROS (ie. rosserial_arduino). 
+
+
+
