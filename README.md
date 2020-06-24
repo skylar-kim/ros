@@ -692,6 +692,46 @@ __What is Rosserial?__
 __Rosserial Client Libraries__:
 - different client libraries were developed to get ROS up and running on various systems  
 - __rosserial_client__: generic client-side rosserial implementation. Designed for microcontrollers and it can run on any processor that has ANSI C++ compiler and a serial port connection to a computer running ROS (ie. rosserial_arduino). 
+- __rosserial_python__: Python-based implementation (recommended for PC usuage)  
+- __rosserial_server__: A C++ implementation, has some limitations compared to the python version but recommended for high-performance applications
 
+### Arduino
+__What is Arduino?__  
+- open source electronics platform  
+- easy to use hardware and software  
+- read an input (light sensor, fingerprint, etc)  
+- write output (activate motor, turn led on/off)  
+- Use C for programming (Arduino IDE)  
+- Used in many applications: prototyping, IoT, Robotics, embedded systems, etc  
 
+__Why Arduino?__  
+- cheap  
+- cross platform  
+- simple, clear programming environment  
+- open source and extensible software/hardware  
+- different types of Arduino boards that allows you to connect to the internet  
 
+#### Arduino IDE: Example of Temperature Sensor 
+Made up of 2 main important functions:  
+1. setup
+```c
+void setup()
+{
+  // Start the serial connection with the computer
+  // to view the result, open the serial monitor
+  Serial.begin(9600); 
+
+}
+```
+2. loop: the method loop will run forever and all application logic must be defined in the method loop
+```c
+void loop()
+{
+  // code here
+}
+```
+
+__Note__: If we want to connect the data that the Arduino gets from the sensors, we need to install rosserial libraries to connect the Arduino to the ROS ecosystem.  
+
+#### Install rosserial libraries
+[ROS Documentation: rosserial](http://wiki.ros.org/rosserial)
