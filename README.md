@@ -735,3 +735,64 @@ __Note__: If we want to connect the data that the Arduino gets from the sensors,
 
 #### Install rosserial libraries
 [ROS Documentation: rosserial](http://wiki.ros.org/rosserial)
+
+# ROS for Beginners II: Localization, Navigation, and SLAM
+
+## ROS Navigation Demo 
+### Set Up
+1. Open a terminal and export the TurtleBot3 model in your bashrc file.  
+In your terminal: `$ gedit ~/.bashrc`  
+In the bashrc file: `export TURTLEBOT3_MODEL=waffle`. Save the bashrc file edits with either Ctrl+C or click on the Save button. Exit out of the bashrc file and back to the terminal. In your terminal, in order for the changes to be reflected, type in the command: `$ source ~/.bashrc`  
+2. Go to where you downloaded the tb3_house_map file and right click on the pgm file and click on properties. Copy the file location with the file name. Right click on the yaml file and open with gedit. Past the pgm file location you copied, after "image: ". Hit save, and then close. 
+3. Start the Gazebo simulation: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`  
+4. Open another terminal and load the navigation stack: `$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yml`. Remember to replace /home/skylar/tb3_house_map.yml path with the path that you have.  
+5. When you start both Gazebo and Rviz, your screen should look like this:  
+[Gazebo and Rviz](images/gazeborviz.PNG)  
+
+### Setting the initial location of the robot
+6. Robots do not know initially their start locations. We have to tell them manually. In the Rviz navigation interface, click on 2D Pose estimate and click on the area of the map that will align the Rviz map with the Gazebo map. You will know when it is aligned if the laser scan readings are not deviated and line up with the map.  
+[2D Post Estimate](images/2dposeestimate.PNG)  
+
+### Frames
+7. What is the location and orientation of the robot? In order to know this information, we can look at the list of topics: `$ rostopic list`  
+8. We want to identify the topic that represents the location of the robot. However, before doing that, we must observe the following:  
+In Rviz, there is a grid overlay that can be turned on/off. In the middle of the grid is the origin point (0,0). This is called the __reference frame__ that we use to determine the location of the robot.  
+We can visualize this frame on Rviz by using the __tf__ topics that show us all the frames. To do this in Rviz, go to Add > TF.  
+9. A __frame__ is a reference that is used to localize objects/robots.  
+TF allows us to visualize different frames like /odom and /map.
+[Frames](images/tfframes.PNG)  
+/map is the global map frame  
+/odom is the a frame that will be covered in a later section.  
+Under Global Options, you can choose to view different frames under Fixed Frame.
+
+### Location of the Robot in Different Frames
+/odom: topic represents a pose based on odometry information. 
+`$ rostopic echo /odom` will show the name of the reference frame and the location of the robot with respect to the odom frame (along with other information).  
+[Odom Frame](images/odom.PNG)  
+
+/amcl_pose: topic represents the global pose of the robot in the environment with respect to the global map frame
+`$ rostopic echo /amcl_pose` will also show the name of the reference frame and the location of the robot with respect to the map frame (along with other information)  
+[Global Map Frame](images/map.PNG) 
+
+__Note__: robots can have different types of locations based on the reference frame  
+
+### How is Orientation Represented in 3D space?
+`$ rostopic echo /odom` will return 4 values (x,y,z,w) for the orientation of the robot. This is the __quaternion__ representation of orienation.  
+[Quaternion](images/orientation.PNG)
+
+## 2D Frames, Tranformations, and Localization
+
+### Pose of a robot in a frame
+Pose: The pose of the robot is represented by the (x,y) coordinates and the orientation in a 2D frame.  In order to have a pose, we need a reference frame. Tranformations between two frames involves a translation and rotation between the two frames.  
+
+### Dealing with Multiple Frames
+Location of an object is dependent on the coordinate frame.  
+In robotics, a robot knows its location in the environment in respect to the world frame and observes objects around them (such as a person) and locates those objects in respect to their frame (the robot frame).  
+The question is: What is the location of the Person the World Frame F{W} if the robot knows its location in the F{W} and the location of the person in the Robot Frame F{R}?
+
+### Coordinate Frame Transformation
+Transformation Types:  
+- Translation: a frame is translated by a certain vector with respect to another frame    
+- Rotation: frame is rotated a certain angle in respect to another frame  
+
+Pure Rotation: just rotation, no translation  
