@@ -795,4 +795,38 @@ Transformation Types:
 - Translation: a frame is translated by a certain vector with respect to another frame    
 - Rotation: frame is rotated a certain angle in respect to another frame  
 
-Pure Rotation: just rotation, no translation  
+- Pure Rotation: just rotation, no translation  
+- Transformation: Translation + Rotation  
+
+### 2D Translation
+A system of equations can be used to represent the relation of the position of the robot in two different frames related by a translation.  
+The example in the video is the following (pure translation):  
+w1_x = w2_x + 3  
+w1_y = w2_x + 2  
+
+### 2D Rotation
+Note: ROS libraries does all these calculations for us!  
+w1_x = cos(theta) * w2_x - sin(theta) * w2_y  
+w1_y = sin(theta) * w2_x + cos(theta) * w2_y  
+
+which... is just a rotation matrix (pure rotation) (bad formatting sorry)  
+[w1_x] = [cos(theta) -sin(theta)] * [w2_x]
+[w1_y] = [sin(theta) cos(theta)]  * [w2_y]  
+
+### 2D Transformation: Translation + Rotation
+Counterclockwise rotation angle theta:  
+[Transformation matrix](images/transformationmatrix.PNG)  
+
+Transformation Example:
+Location in the __Robot__ and __World__ Coordinate Frames  
+Robot: (3,3) in F{W}  
+Person: (6, 3.5) in F{R}  
+
+Question: What is the position of the person in the world frame?  
+
+1. Determine the transformation matrix between the world frame and the robot frame  
+Zero Rotation + (3,3) Translation vector  
+
+2. Plug in info into transformation matrix:
+[Transformation matrix example](images/transformationmatrixex.PNG)  
+[Transformation matrix example](images/answer.PNG) 
