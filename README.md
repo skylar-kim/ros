@@ -913,4 +913,17 @@ The TF package has several ROS nodes that provide utilities to manipulate frames
 Frames:  
 map: represents global frame  
 odom: frame relative to odometry (parent of base_footprint, child of map)  
-base_footprint: attached to the base of the robot at its center (parent of other frames like sensors attached to the robot, child of odom frame)
+base_footprint: attached to the base of the robot at its center (parent of other frames like sensors attached to the robot, child of odom frame)  
+
+__Odom Position Message Format:__  
+encoded under: nav_msgs/Odometry Message and contains information about the  
+- geometry_msgs/Pose  
+- geometry_msgs/Twist
+- the orientation is encoded as a geometry_msgs/Quaternion  
+
+__AMCL_POSE Position message Format:__  
+geometry_msgs/PoseWithCovarianceStamped Message  
+global map frame  
+contains only the Pose information (position and orientation)  
+Orientation is geometry_msgs/Quaternion  
+
