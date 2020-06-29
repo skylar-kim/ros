@@ -869,4 +869,48 @@ __Why Quaternion?__
 3. Quaternions have application in computer graphics, computer vision, robotics, navigation, molecular dynamics, flight dynamics, orbital mechanics of satellites and crystallographic texture analysis (that's pretty cool!!)  
 
 Essentially, when drone control is done through simple linearization of euler angles, the drone control is not robust enough against high disturbance and inclinations. But, when quaternions are used, the control of the drone is more robust even with sharp inclinations.  
-Example demo here: https://www.youtube.com/watch?v=0VAc_G79POE
+Example demo here: https://www.youtube.com/watch?v=0VAc_G79POE  
+
+## TF Package in ROS
+TF package: ROS library that embeds all operations related to frames and transformations and makes them easy to utilize  
+- stands for transformation libary in ROS  
+- performs computation for transformations between frames  
+- allows to find the pose of any object in any frame using transformations  
+- robot is a collection of frames attached to its different joints (ie. body, actuators, sensors, etc)  
+- frames are defined in every joint and component of the robot  
+
+### URDF: Language for the Description of Frames and Transformations
+__URDF__: Unified Robot Description Format, every robot in ROS is described in an XML format using the URDF. It is used by the navigation stack and the localization modules to localize the objects.   
+- frames are attached to joints and called links  
+- Relative position between the joints are defined as transformations specified by a translation vector and/or a rotation matrix.  
+The translation vector is specified by the x y z coordinates of the vector and rotation is defined by roll pitch and yaw (rpy).  
+
+- Any transformation between any two frames is defined in the URDF file. The URDF file is used by the navigation stack  
+
+```xml
+<joint name="base_joint" type="fixed">
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+  <origin xyz="0.0 0.0 0.010" rpy="0 0 0"/>
+</joint>
+```
+Explanantion of URDF above: There is a frame called "base_footprint" that is the parent of the frame "base_link" that is 1cm above the frame "base_footprint" with respect to the z axis
+
+### Why is TF important?
+1. Performs transformations easily  
+2. The user does not need to worry about frames  
+3. Provides built-in functions to publish and listen to frames in ROS
+
+### TF Package Nodes
+The TF package has several ROS nodes that provide utilities to manipulate frames and transformations in ROS. It can either be published by a broadcaster node or subscribed by a ROS node that listens to the frames.    
+- view_frames: visualizes the full tree of coordinate transformations as a PDF file. run with `$ rosrun tf view_frames`
+- tf_monitor: monitors transforms between frames. run with `$ rosrun tf tf_monitor` to find information about the frames that are active  
+- tf_echo: prints specified transform from source frame to target frame onto the screen. run with `$ rosrun tf tf_echo odom base_footprint`.   
+- roswtf: with the tfwtf plugin, helps you track down problems with tf  
+- static_transform_publisher: command line tool for sending static transforms
+
+
+Frames:  
+map: represents global frame  
+odom: frame relative to odometry (parent of base_footprint, child of map)  
+base_footprint: attached to the base of the robot at its center (parent of other frames like sensors attached to the robot, child of odom frame)
