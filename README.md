@@ -830,3 +830,43 @@ Zero Rotation + (3,3) Translation vector
 2. Plug in info into transformation matrix:
 [Transformation matrix example](images/transformationmatrixex.PNG)  
 [Transformation matrix example](images/answer.PNG) 
+
+## 3D Coordinate System & 3D Transformations
+Ex: drone flies above the ground, altitude > 0, therefore we need a 3d coordinate system  
+
+Roll/bank: rotation around x axis  
+Pitch/attitude: rotation around y axis  
+Yaw/heading: rotation around z axis  
+[Rotation](images/rotation.PNG)  
+
+Work with ground robot -> consider yaw only  
+Work with flying drone -> consider all angles  
+There are 3 rotation matrices for each angle  
+[Rotation Matrix](images/matrix.PNG)  
+
+Matrix Multiplication for 3d Transformations:  
+[3D Transformation](images/3dmatrix.PNG)  
+
+### Orientation in 3D Space
+__Rotation Representation Methods:__  
+1. Three Angle Representation (Euler Representation vs Cardan Rotation)  
+2. Rotation about Arbitrary Vector  
+3. Quaternions  
+
+__Three Angle Representation__:  
+1. Euler Rotation Sequence: involves repetition, but not successive, of rotations about one particular axis  
+Theorem(??): Any __two__ independent __orthonormal coordinate frames__ can be related by a sequence of rotations (not more than three) about coordinate axes, where __no two successive__ rotations may be about the same axis. 
+2. Cardian Rotation Sequence: characterized by rotations about all three axes, specific case of a Euler Rotation
+
+__Quaternions__: used by default in ROS for rotations  
+[Quaternion](images/quaternion.PNG)  
+More info at this website: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm  
+It's possible to convert Euler Angles to Quaternion and vice versa: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles  
+
+__Why Quaternion?__  
+1. Compared to Euler angles they are simpler to compose and avoid the problem of gimbal lock  
+2. Compared to rotation matrices they are more compact, more numerically stable, and more efficient  
+3. Quaternions have application in computer graphics, computer vision, robotics, navigation, molecular dynamics, flight dynamics, orbital mechanics of satellites and crystallographic texture analysis (that's pretty cool!!)  
+
+Essentially, when drone control is done through simple linearization of euler angles, the drone control is not robust enough against high disturbance and inclinations. But, when quaternions are used, the control of the drone is more robust even with sharp inclinations.  
+Example demo here: https://www.youtube.com/watch?v=0VAc_G79POE
