@@ -747,11 +747,11 @@ In the bashrc file: `export TURTLEBOT3_MODEL=waffle`. Save the bashrc file edits
 3. Start the Gazebo simulation: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`  
 4. Open another terminal and load the navigation stack: `$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yml`. Remember to replace /home/skylar/tb3_house_map.yml path with the path that you have.  
 5. When you start both Gazebo and Rviz, your screen should look like this:  
-[Gazebo and Rviz](images/gazeborviz.PNG)  
+![Gazebo and Rviz](images/gazeborviz.PNG)  
 
 ### Setting the initial location of the robot
 6. Robots do not know initially their start locations. We have to tell them manually. In the Rviz navigation interface, click on 2D Pose estimate and click on the area of the map that will align the Rviz map with the Gazebo map. You will know when it is aligned if the laser scan readings are not deviated and line up with the map.  
-[2D Post Estimate](images/2dposeestimate.PNG)  
+![2D Post Estimate](images/2dposeestimate.PNG)  
 
 ### Frames
 7. What is the location and orientation of the robot? In order to know this information, we can look at the list of topics: `$ rostopic list`  
@@ -760,7 +760,7 @@ In Rviz, there is a grid overlay that can be turned on/off. In the middle of the
 We can visualize this frame on Rviz by using the __tf__ topics that show us all the frames. To do this in Rviz, go to Add > TF.  
 9. A __frame__ is a reference that is used to localize objects/robots.  
 TF allows us to visualize different frames like /odom and /map.
-[Frames](images/tfframes.PNG)  
+![Frames](images/tfframes.PNG)  
 /map is the global map frame  
 /odom is the a frame that will be covered in a later section.  
 Under Global Options, you can choose to view different frames under Fixed Frame.
@@ -768,17 +768,17 @@ Under Global Options, you can choose to view different frames under Fixed Frame.
 ### Location of the Robot in Different Frames
 /odom: topic represents a pose based on odometry information. 
 `$ rostopic echo /odom` will show the name of the reference frame and the location of the robot with respect to the odom frame (along with other information).  
-[Odom Frame](images/odom.PNG)  
+![Odom Frame](images/odom.PNG)  
 
 /amcl_pose: topic represents the global pose of the robot in the environment with respect to the global map frame
 `$ rostopic echo /amcl_pose` will also show the name of the reference frame and the location of the robot with respect to the map frame (along with other information)  
-[Global Map Frame](images/map.PNG) 
+![Global Map Frame](images/map.PNG) 
 
 __Note__: robots can have different types of locations based on the reference frame  
 
 ### How is Orientation Represented in 3D space?
 `$ rostopic echo /odom` will return 4 values (x,y,z,w) for the orientation of the robot. This is the __quaternion__ representation of orienation.  
-[Quaternion](images/orientation.PNG)
+![Quaternion](images/orientation.PNG)
 
 ## 2D Frames, Tranformations, and Localization
 
@@ -815,7 +815,7 @@ which... is just a rotation matrix (pure rotation) (bad formatting sorry)
 
 ### 2D Transformation: Translation + Rotation
 Counterclockwise rotation angle theta:  
-[Transformation matrix](images/transformationmatrix.PNG)  
+![Transformation matrix](images/transformationmatrix.PNG)  
 
 Transformation Example:
 Location in the __Robot__ and __World__ Coordinate Frames  
@@ -828,8 +828,8 @@ Question: What is the position of the person in the world frame?
 Zero Rotation + (3,3) Translation vector  
 
 2. Plug in info into transformation matrix:
-[Transformation matrix example](images/transformationmatrixex.PNG)  
-[Transformation matrix example](images/answer.PNG) 
+![Transformation matrix example](images/transformationmatrixex.PNG)  
+![Transformation matrix example](images/answer.PNG) 
 
 ## 3D Coordinate System & 3D Transformations
 Ex: drone flies above the ground, altitude > 0, therefore we need a 3d coordinate system  
@@ -837,15 +837,15 @@ Ex: drone flies above the ground, altitude > 0, therefore we need a 3d coordinat
 Roll/bank: rotation around x axis  
 Pitch/attitude: rotation around y axis  
 Yaw/heading: rotation around z axis  
-[Rotation](images/rotation.PNG)  
+![Rotation](images/rotation.PNG)  
 
 Work with ground robot -> consider yaw only  
 Work with flying drone -> consider all angles  
 There are 3 rotation matrices for each angle  
-[Rotation Matrix](images/matrix.PNG)  
+![Rotation Matrix](images/matrix.PNG)  
 
 Matrix Multiplication for 3d Transformations:  
-[3D Transformation](images/3dmatrix.PNG)  
+![3D Transformation](images/3dmatrix.PNG)  
 
 ### Orientation in 3D Space
 __Rotation Representation Methods:__  
@@ -859,7 +859,7 @@ Theorem(??): Any __two__ independent __orthonormal coordinate frames__ can be re
 2. Cardian Rotation Sequence: characterized by rotations about all three axes, specific case of a Euler Rotation
 
 __Quaternions__: used by default in ROS for rotations  
-[Quaternion](images/quaternion.PNG)  
+![Quaternion](images/quaternion.PNG)  
 More info at this website: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm  
 It's possible to convert Euler Angles to Quaternion and vice versa: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles  
 
