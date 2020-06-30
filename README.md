@@ -1015,9 +1015,78 @@ publishing transformations between any two frames
 Example code is __frame_a_to_frame_b_broadcast.py__
 
 ### Listening to a transformation in a ROS Node
-Example code is __frame_a_to_frame_b_listener.py__
+Example code is __frame_a_to_frame_b_listener.py__  
 
 The listener is able to detect the frames and get the transformation between them (translation + rotation)
+
+
+## Map-based navigation
+__Navigation in ROS:__  
+- robot navigation means the ability to move in space without hitting obstacles  
+- two major categories: map-based navigation (robot loads a map, robot has a global knowledge of static obstacles and uses the knowledge to plan a path), reactive navigation (uses only local information from sensors which is used to plan its motion)  
+
+### Map-Based Navigation Overview
+Map-Based Navigation:  
+- where am I? = localization    
+- where am I going? = finding the destination location    
+- how do I get there? = path planning process    
+- __Localization__: it helps the robot to know where he is (ie. GPS, Laser range scanners, ultrasound sensors, etc)  
+- __Mapping__: the robot needs to have a map of its environment to be able to recognize where he has been moving around so far  
+- __Motion planning or path planning__: to plan a path, the target position must be well-defined to the robot, which requires an appropriate addressing scheme that the robot can understand. (ie. If a robot is told to go to room 123, the address can be given in absolute or relative coordinates. Absolute = global reference frame, relative = address is attached to a relative frame)  
+
+__Building a Map: Simultaneous Localization and Mapping (SLAM)__  
+- It is the process of building a map using range sensors (ie. laser sensors, 3d sensors, ultrasonic sensors) while the robot is moving around and exploring an unknown area  
+- Sensor Fusion: process uses filtering techniques like Kalman filters or particle filters  
+
+__Navigation in ROS:__ There are 3 main packages of the navigation stack  
+- move_base: makes the robot navigate in a map and move to a goal pose with respect to a given reference frame  
+- gmapping: creates maps using laser scan data  
+- amcl: responsible for localization using an existing map  
+
+
+### SLAM Demonstration and Discussions  
+__Turtlebot3 SLAM Demo:__  
+1. Start Turtlebot3 Waffle:  
+```
+$ export TURTLEBOT3_MODEL=waffle  
+$ roslaunch turtlebot3_gazebo turtlebot3_house.launch
+```
+2. Open __gmapping__ SLAM application which is responsible for building the map. This package contains a ROS wrapper for OpenSLAM gmapping. The gmapping package provides a laser based SLAM algorithm as a ROS node called SLAM gmapping.      
+```
+$ export TURTLEBOT3_MODEL=waffle_pi
+$ roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping
+```
+3. Teleop the robot  
+```
+$ export TURTLEBOT3_MODEL=waffle_pi
+$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+```
+4. Save the Map: `$ rosrun map_server map_saver -f ~/name_of_map`. This will generate two files, one with a .pgm extension and another with a .yaml extension. The pgm file contains the iamge of the map itself (and can be opened with any image editor), while the .yaml file contains metadata info about the map, including the location of the image of the map file, resolution, origin, occupied threshold, and free cells threshold.     
+![Origin](images/yaw.PNG)  
+__occupied_threshold__: means any pixel value greater than 0.65 of max color value, it is considered as occupied. This is a way to convert the grayscale image into a binary image.  
+__negate__: if equal to 1, any pixel that is black becomes white and every white pixel becomes black.  
+
+__SLAM Approaches in ROS__:  
+1. gmapping: contains a ROS wrapper for OpenSlam's Gmapping  
+2. cartographer: system developed by Google that provides real-time SLAM in 2D and 3D across multiple platforms and sensor configurations  
+3. hector_slam: another SLAM approach that can be used without odometry.  
+
+__Occupancy Grid in ROS:__  
+A SLAM map is made up of cells. Cells have three possible states:  
+1. Unknown: gray, value -1    
+2. Empty: white, value 1    
+3. Occupied: black, value 0  
+
+The robot constantly updates its own location with the odometry information and the global map information that the robot is building.  
+
+### Understand ROS Nodes and Launch Files used for SLAM  
+
+
+
+
+
+
+
 
 
 
