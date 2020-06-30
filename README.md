@@ -1051,7 +1051,7 @@ __Turtlebot3 SLAM Demo:__
 $ export TURTLEBOT3_MODEL=waffle  
 $ roslaunch turtlebot3_gazebo turtlebot3_house.launch
 ```
-2. Open __gmapping__ SLAM application which is responsible for building the map. This package contains a ROS wrapper for OpenSLAM gmapping. The gmapping package provides a laser based SLAM algorithm as a ROS node called SLAM gmapping.      
+2. Open __gmapping__ SLAM application which is responsible for building the map. This package contains a ROS wrapper for OpenSLAM gmapping. The gmapping package provides a laser based SLAM algorithm as a ROS node called SLAM gmapping. If there is an error, make sure to download the gmapping module: https://newscrewdriver.com/2018/08/11/running-turtlebot3-mapping-demonstration-with-a-twist/     
 ```
 $ export TURTLEBOT3_MODEL=waffle_pi
 $ roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping
@@ -1079,14 +1079,95 @@ A SLAM map is made up of cells. Cells have three possible states:
 
 The robot constantly updates its own location with the odometry information and the global map information that the robot is building.  
 
-### Understand ROS Nodes and Launch Files used for SLAM  
+### Understand ROS Nodes and Launch Files used for SLAM
+1. Go to the Turtlebot3 SLAM folder: `$ roscd turtlebot3_slam/`  
+2. Go to the launch folder: `$ cd launch`  
+3. We can open the turtlebot3_slam.launch file with an editor like Sublime or gedit to look at the contents.  
+4. The Turtlebot3 Model is taken from the environment variables:
+```xml
+  <!-- TurtleBot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+```  
+5. Open Rviz is set to open automatically:  
+```xml
+<arg name="open_rviz" default="true"/>
+```
+6. The rest of the launch file is below:
+```xml
+<launch>
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="slam_methods" default="gmapping" doc="slam type [gmapping, cartographer, hector, karto, frontier_exploration]"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="open_rviz" default="true"/>
 
+  <!-- TurtleBot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
 
+  <!-- SLAM: Gmapping, Cartographer, Hector, Karto, Frontier_exploration, RTAB-Map -->
+  <include file="$(find turtlebot3_slam)/launch/turtlebot3_$(arg slam_methods).launch">
+    <arg name="model" value="$(arg model)"/>
+    <arg name="configuration_basename" value="$(arg configuration_basename)"/>
+  </include>
 
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find turtlebot3_slam)/rviz/turtlebot3_$(arg slam_methods).rviz"/>
+  </group>
+</launch>
+```
 
+Explanantion of __turtlebot3_gmapping.launch__:
+1. This file first sets the arguments needed for the SLAM operation. For example, the name of the odom frame, base frame, and map frame and the type of the Turtlebot3 robot.  
+```xml
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="set_base_frame" default="base_footprint"/>
+  <arg name="set_odom_frame" default="odom"/>
+  <arg name="set_map_frame"  default="map"/>
+```
+2. Then the gmapping node is started, and all the parameters are specified underneath:
+```xml
+<node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
+  <param name="base_frame" value="$(arg set_base_frame)"/>
+  <param name="odom_frame" value="$(arg set_odom_frame)"/>
+  <param name="map_frame"  value="$(arg set_map_frame)"/>
+</node>
+```
+The frame names need to be specified and will be taken from the arguments above in `<arg name/>`.  
+The SLAM algorithm needs 3 important frames. The __base_frame__ which is attached to the body of the robot, the __odom_frame__ which is attached to the odometry motion of the robot, and the __map_frame__ which represents the global reference frame.  
 
+__The base, odom, and map frame are mandatory for any robot navigation mission!!!__
 
+### Turtlebot3 Navigation Demo
+1. Start Turtlebot3 Waffle:
+```
+$ export TURTLEBOT3_MODEL=waffle
+$ roslaunch turtlebot3_gazebo turtlebot3_house.launch
+```
+2. open navigation application: 
+```
+$ export TURTLEBOT3_MODEL=waffle_pi
+$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yaml
+```
+When the navigation stack is ran, Rviz should pop up and the robot is placed at the center of the map at (0,0) but the location in Rviz does not correspond to the location in Gazebo.  
+We need to set the location manually with __2D Pose Estimate__.  
 
+__Navigation Demo Summary:__  
+1. We first need to manually set the initial location of the robot in the map using 2D Pose Estimate  
+2. We send goal poses (location + orientation) using 2D Nav Goal, so that the robot moves to it.  
+3. The navigation stack has 2 motion planners:  
+- __Global path planner__: plans a _static obstacle-free_ path from the location of the robot to the goal location  
+- __Local path planner__: execute the planned trajectory and avoids _dynamic_ obstacle.  
 
-
-
+### The Recovery Behavior
+When running the navigation stack and running 2D Nav Goal, the map in Rviz has different colors. The cyan colored edges represent obstacle inflation that is considered as obstacles by the global path planner so that there is enough buffer room for the robot to navigate.  
+This is why when doing 2D Nav Goal, the robot can have jerky movement because of the inflation of obstacles added by the global and local planner. This is called the recovery behavior.  
+__Recovery Behavior__: initiated when the local planner finds obstacles while following the planned global path.  
+__Clearing Process__: wrong obstacles are cleared using data from the laser scanner by the navigation stack as the robot is moving towards the navigation goal. The opposite process is called __marking__.
