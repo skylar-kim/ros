@@ -915,6 +915,32 @@ map: represents global frame
 odom: frame relative to odometry (parent of base_footprint, child of map)  
 base_footprint: attached to the base of the robot at its center (parent of other frames like sensors attached to the robot, child of odom frame)  
 
+
+
+### Convert Orientation Between Quaternion and Roll-Pitch-Yaw with ROS tf package
+
+Check __tf_rotation_conversions.py__ for the example code.  
+
+Notes:  
+- make sure to import the tf package  
+- default unit of angles in ROS is radians, so must convert degrees to radians   
+- to convert roll-pitch-yaw angles to quaternion (this will return a list of 4 values): 
+```python
+quaternion = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+```
+- to convert quaternion to roll-pitch-yaw (this will return a list of 3 values):
+```python
+rpy = tf.transformation.euler_from_quaternion(quaternion)
+```  
+
+### Reading the Orientation of a Robot from its Pose  
+Steps:  
+1. Start Turtlebot3 Waffle Simulator:  
+2. List all topics  
+3. Check info of /odom topic and /amcl_pose topic  
+4. Understand how position and orientation are presented  
+5. Write a script that prints the x and y coordinate and yaw angle of the Turtlebot3 robot.  
+
 __Odom Position Message Format:__  
 encoded under: nav_msgs/Odometry Message and contains information about the  
 - geometry_msgs/Pose  
@@ -926,4 +952,68 @@ geometry_msgs/PoseWithCovarianceStamped Message
 global map frame  
 contains only the Pose information (position and orientation)  
 Orientation is geometry_msgs/Quaternion  
+
+1. Start Turtlebot3 simulator. It will provide the position with respect to the /odom topic: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`  
+2. Start the navigation stack of Turtlebot3 to get the global position in the map frame amcl_pose: `$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yaml`  
+3. Run `$ rostopic list` to find out the active topics. We can find /odom (odom is location relative to the odom frame) and /amcl_pose (amcl_pose is the global position with respect to the map frame)  
+4. In Rviz, we can choose what frames to visualize by going to TF tab and checking the frames we want to see.  
+5. To see information regarding the odom topic, run `$ rostopic info odom` and you will see that the Type: nav_msgs/Odometry. To see the content of the message, run `$ rostopic echo odom`. You can now see the position and the orientation(quaternion) of the robot.  
+6. To see the row-pitch-yaw of the robot instead of the quaternion, we can create a ROS node to subscribe to the /odom topic and converts the quaternion to rpy.  
+7. To see an example ROS node, the code is under __tf_orientation_tb3_robot.py__  
+
+### The tf package command line and utilities  
+1. Start Turtlebot3 simulator: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`   
+2. Run `$ rostopic list` to find out the active topics. There is a topic called /tf, meaning, there are frames that are published to that topic.  
+3. To view those frames: `$ rosrun tf view_frames`. This command will listen to all frames that are published, for 5 seconds, and then saves a PDF file (in the current working directory). Observe that there is only the /odom and /base_footprint frames. hmm...  
+4. We can also check the frames by running: `$ rostopic echo tf`  
+5. We can also check the information by running: `$ rostopic info tf`. The type of message is: tf2_msgs/TFMessage.  
+6. To see the content of the message, run `$ rosmsg show tf2_msgs/TFMessage`  
+
+### view_frames command line 
+1. Start Turtlebot3 simulator for Rviz: `$ roslaunch turtlebot3_gazebo turtlebot3_gazebo_rviz.launch`   
+2. Generate pdf file with all the frames: `$ rosrun tf view_frames`  
+3. The pdf file has more frames than last time. All the frames that are the child frames of base_footprint are the components, joints, sensors, etc that are attached on the Turtlebot3 robot.  
+4. What happened? Well when we launched the Turtlebot3 Gazebo simulator for Rviz, the URDF model description was also loaded with rviz that contains all the frames published to the ROS ecosystem by the static_transform_publisher.  
+5. __static_transform_publisher__: a ROS node that publishes a transformation between frames.  
+6. Observe that /gazebo is the publisher of the transformation between odom and base_footprint. For all other transforms, /robot_state_publisher is the publisher node that uses the URDF file and publishes the transformations.  
+
+Essentially, __view_frames__ utility shows all the frames attached to the robot.  
+
+Another demo:  
+1. Start Turtlebot3 simulator: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`   
+2. Open the same navigation stack using the same house map of the previous examples: `$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yaml`  
+3. Generate the pdf file of the frames with `$ rosrun tf view_frames`.  
+4. This frames.pdf file is almost the same as the previous file, but it contains the /map frame, which is the parent frame of /odom. The map frame came from the navigation stack module. Since the map represents a global reference to localize the robot, the map frame is the parent of all other frames.  
+5. Run `$ rostopic echo amcl_pose` to check the content of the map frame message (under /amcl_pose). The frame id is "map". __The map frame is required for any map-based navigation mission.__  
+
+### tf_echo command line  
+1. `$ rosrun tf tf_echo map odom` this command allows us to see the transformation between any two frames. The source frame is the map frame, and the target frame is the odom frame in this example. The command will show the __translation__ and the __rotation in quaternion__ between the two frames.    
+2. If you do `$ rosrun tf tf_echo odom map`, it will return the inverse transformation.  
+3. Note: __TF can calculate the transformation between any two frames even if they do not have a direct parent to child relationship__. For example: `$ rosrun tf tf_echo odom camera_rgb_frame`
+
+### tf_monitor command line  
+1. Monitor the transforms with tf_monitor: `$ rosrun tf tf_monitor odom base_footprint`  
+2. This will show information about the transformation like the publisher node, statistics of all broadcasters, etc.  
+3. We can monitor all transformations: `$ rosrun tf tf_monitor`  
+
+### static transform publisher 
+publishing transformations between any two frames 
+
+1. Start roscore  
+2. run `$ rostopic list` and observe there is no tf topic  
+3. Create a transformation and publish it: `$ rosrun tf static_transform_publisher 1 2 3 0.1 0.2 0.3 frame_a frame_b 10`. __static_transform_publisher__: creates a transformation between two frames. [1 2 3] represents the coordinate of the translation vector. [0.1 0.2 0.3] represents the rotation angles: yaw roll pitch. The parent frame is frame_a and the child frame is frame_b. 10 is the frequency, meaning the message will be published ten times each second.   
+4. Running `$ rostopic list` will show the tf topic. We can view all the frames in the tf topic with `$ rosrun tf view_frames`. Opening the pdf file shows the relationship between the two frames.  
+5. Another way to visualize: `$ rosrun tf tf_echo frame_a frame_b`. The translation vector should say [1.000, 2.000, 3.000] and the Rotation > RPY (radian) should be [0.300 0.200 0.100].  
+6. Possible to do the same action through a launch file:
+```xml 
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="frame_a_to_frame_b" args="1 2 3 0.1 0.2 0.3 frame_a frame_b 10"/>
+</launch>
+```
+
+
+
+
+
+
 
