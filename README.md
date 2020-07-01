@@ -1178,7 +1178,37 @@ Objective: Write a ROS program in C++ and Python that will allow you to define g
 
 __First Problem__: How to determine the coordinate of the goal location?  
 1. Can use the middle of the map as (0,0) and determine the coordinates from there.  
-2. More accurate way to determine the goal location is to read its value from the topic initialpose: `$ rostopic echo initialpose`. This command will wait for any update of the initial pose. The initial pose can be noted and used later in the ROS node file as the pose of the goal location.  
+2. More accurate way to determine the goal location is to read its value from the topic initialpose: `$ rostopic echo initialpose`. This command will wait for any update of the initial pose. 
+3. Use 2D Pose Estimate in Rviz. The initial pose coordinates can be observed from the rostopic echo command and used later in the ROS node file as the pose of the goal location. One thing to note about initialpose topic, a pose will only be published if a new pose is selected using 2D Pose Estimate.  
+If you use `$ rostopic echo amcl_pose` you will get the current location of the robot in the global map. So this is another possible method.  
 
-ActionLib is suitable for the navigation because it is asynchronous and allows the robot to eprform other tasks while navigating.  
-Using ROS Services is not appropriate for navigation because it will block the robot (no other processes will be carried out while waiting for a ROS Action after sending out a ROS Service message). This is why move_base is implemented as an actionlib. 
+__move_base__: is a ROS node that provides implementation of an action that, given a goal in the world, will atempt to reach it with a mobile base. The node links together a global and local path planner. http://wiki.ros.org/move_base 
+
+__ActionLib__ is suitable for the navigation because it is asynchronous and allows the robot to eprform other tasks while navigating.  
+Using ROS Services is not appropriate for navigation because it will block the robot (no other processes will be carried out while waiting for a ROS Action after sending out a ROS Service message). This is why move_base is implemented as an actionlib.  
+
+1. For the navigation of a robot we need to create an actionlib client that sends the request to the navigation stack server with the goal location as an input parameter. This will make the robot move towards the goal location. In our ROS node, we need to make a client that will perform the request and wait for the response. 
+```python
+ac = actionlib.SimpleActionClient("move_base", MoveBaseAction)
+``` 
+The first parameter is the name of the actionlib server corresponding to the navigation stack of the robot that is responsible to perform the whole navigation mission.  
+The second parameter is the type of message exchanged for the request response between the actionlib client and actionlib server. ie. MoveBaseAction type.  
+
+2. Try to establish connection to the action server and wait:
+```python
+while(not ac.wait_for_server(rospy.Duration.from_sec(5.0))):
+           rospy.loginfo("Waiting for the move_base action server to come up")
+```
+
+3. Specify our goal location by defining an object of type MoveBaseGoal:
+```python
+goal = MoveBaseGoal()
+```
+4. Set the reference frame of the robot. It's important to set the correct frame, otherwise the navigation will be off. 
+```python
+#set up the frame parameters
+goal.target_pose.header.frame_id = "map"
+goal.target_pose.header.stamp = rospy.Time.now()
+```
+
+### Understand the Recovery Behaviors of the Navigation Stack
