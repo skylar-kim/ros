@@ -1171,3 +1171,14 @@ When running the navigation stack and running 2D Nav Goal, the map in Rviz has d
 This is why when doing 2D Nav Goal, the robot can have jerky movement because of the inflation of obstacles added by the global and local planner. This is called the recovery behavior.  
 __Recovery Behavior__: initiated when the local planner finds obstacles while following the planned global path.  
 __Clearing Process__: wrong obstacles are cleared using data from the laser scanner by the navigation stack as the robot is moving towards the navigation goal. The opposite process is called __marking__.
+
+
+### Write a ROS Node for Map Based Navigation 
+Objective: Write a ROS program in C++ and Python that will allow you to define goal locations programmatically for the robot and then send the goal locations to the navigation stack to execute the mission and make the robot head towards the goal.  
+
+__First Problem__: How to determine the coordinate of the goal location?  
+1. Can use the middle of the map as (0,0) and determine the coordinates from there.  
+2. More accurate way to determine the goal location is to read its value from the topic initialpose: `$ rostopic echo initialpose`. This command will wait for any update of the initial pose. The initial pose can be noted and used later in the ROS node file as the pose of the goal location.  
+
+ActionLib is suitable for the navigation because it is asynchronous and allows the robot to eprform other tasks while navigating.  
+Using ROS Services is not appropriate for navigation because it will block the robot (no other processes will be carried out while waiting for a ROS Action after sending out a ROS Service message). This is why move_base is implemented as an actionlib. 
