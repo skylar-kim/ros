@@ -1212,3 +1212,34 @@ goal.target_pose.header.stamp = rospy.Time.now()
 ```
 
 ### Understand the Recovery Behaviors of the Navigation Stack
+![Recovery](images/recovery.PNG)  
+1. Once a global path is planned, the robot will start its navigation towards the goal location.  
+2. When a robot gets stuck, it will switch to __Recovery Behaviors__.  
+__Recovery Behaviors:__ it is initiated when the local planner finds obstacles while following the planned global path  
+3. First in Recovery stage, it will execute a Conservative Reset: Obstacles outside of a user specified region will be cleared out from the robot map. The navigation stack attempts to clear the costmap to unstuck the robot. The terminal wiThe user specific region is specified in the navigation parameters. If the obstacles are cleared, the robot goes back to navigating.  
+4. If not, the robot will perform an in place rotation to clear the space (Clearing Rotation)  
+5. If the Clearing Rotation fails, it will attempt an Aggressive Reset by removing all obstacles outside of the rectangular region in which it can rotate in place.  
+6. Then the robot will perform an in place rotation to clear the space again (Clearing Rotation). If this succeeds, go back to navigation.  
+7. If all steps fail, the goal is considered aborted.  
+
+The recovery behaviors can be configured using the recovery behavior parameters and disabled using the recovery behavior enabled parameters. 
+
+
+### Robot Setup to Support the ROS Navigation Stack
+![Navigation Stack](images/navstack.PNG)
+The white components are already provided.  
+The gray componets are optional provided nodes.  
+The blue components must be created for each robot platform.  
+- transformation of each sensor attached to the robot  
+- source of odometry messages  
+- base controller  
+- sensor sources (ie. laser scanner data, point cloud)  
+
+__Requirements for Robot Setup:__  
+1. ROS must be installed  
+2. Transform Configuration: Robot needs to be publishing information about the transformation between coordinate frames. Two ways to do this: either from the URDF file or broadcast a static transformation from a ROS node  
+3. Sensor Information: The navigation stack uses information from sensors to avoid obstacles in the world.  
+4. Odometry Information: The navigation stack requires that odometry information be published using tf and the nav_msgs/Odometry message  
+5. Base Controller: the navigation stack assumes that it can send velocity commands using a geometry_msgs/Twist message. Twist messages are assumed to be in base coordinate frame. Converts commands into motor commands.  
+6. (OPTIONAL)Mapping - map_server: Navigation stack can work with or without a map.  
+
