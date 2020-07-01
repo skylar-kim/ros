@@ -1243,3 +1243,35 @@ __Requirements for Robot Setup:__
 5. Base Controller: the navigation stack assumes that it can send velocity commands using a geometry_msgs/Twist message. Twist messages are assumed to be in base coordinate frame. Converts commands into motor commands.  
 6. (OPTIONAL)Mapping - map_server: Navigation stack can work with or without a map.  
 
+## ROS Navigation Stack Tuning & Configuration
+
+### Setting Max/Min Velocity and Acceleration
+__Where to Update Velocity and Acceleration Info:__  
+- parameters of the velocity and acceleration are provided in the yaml config file of the local planner  
+- Turtlebot3 parameter config file location: /opt/ros/kinetic/share/turtlebot3_navigation/param  
+- Open any file related to the local planner and identify the velocity and acceleration parameters for the Turtlebot3 robot. The question is, how to determine/estimate these values?  
+
+__How to Obtain the maximum velocity:__  
+- use a joystick  
+- Translation Velocity: move the robot in a straight line until the speed becomes constant, then echo the odom topic and record the max speed value  
+- Rotational Velocity: rotate the robot 360 degrees until it reaches a constant speed, and then echo the odom topic and record the max speed value.  
+- check the motors manual (if available)  
+- otherwise, we can use the time stamp in the odometry message to estimate the acceleration from the velocity  
+- accel_translation=Vmax/t_Vmax  
+- accel_rotation=Wmax/t_Wmax  
+
+__How to set the minimum values:__  
+- set the minimum translational velocity to a negative value, this is so the local planner can make the robot will backoff when it gets stuck  
+- set the minimum rotational velocity to a negative value (robot can rotate in both directions)  
+- these parameters are used by local planner when the robot gets stuck  
+
+__Velocity in x and y directions:__  
+- the velocity in x direction should be the same as the translational velocity  
+- the velocity in y direction should be zero for non holonomic robot.  
+
+### Global Planner Parameter Tuning
+__Built-in Global Planner in ROS:__  
+- global planner is responsible for finding a global obstacle-free path from the initial location to the goal location using the environment map  
+- global path planner must adhere to __nav core::BaseGlobalPlanner__ interface  
+
+
