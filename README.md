@@ -1272,6 +1272,95 @@ __Velocity in x and y directions:__
 ### Global Planner Parameter Tuning
 __Built-in Global Planner in ROS:__  
 - global planner is responsible for finding a global obstacle-free path from the initial location to the goal location using the environment map  
-- global path planner must adhere to __nav core::BaseGlobalPlanner__ interface  
+- global path planner must adhere to __nav core::BaseGlobalPlanner__ interface. This interface defines the general functionalities of any global path planner  
+- More details on how to implement a global path planner: http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS  
+
+__Build-in Global Planners in ROS:__  
+1. carrot_planner: simple global planner that takes a user-specified goal point and attempts to move the robot as close to it as possible, even when that goal point is in an obstacle  
+2. navfn: use the Dijkstra's algorithm to find the global path between any two locations  
+3. global_planner: replacement of navfn that is more flexible and has more options. global_planner path planner parameters can be tuned and more information can be found here: http://wiki.ros.org/global_planner  
+
+
+### Local Path Planner Overview  
+__Local Path Planner:__ The local planner is responsible for executing the static path determined by the global path planner while avoiding dynamic obstacle that might come into the path using the robot's sensors.  
+
+__DWA Algorithm:__  
+- discretely sample in the robot's control space (dx,dy,dtheta)  
+- for each sampled velocity, perform a forward simulation from the robot's current state to predict what would happen if the sampled velocity were applied for some period of time  
+- evaluate/score each trajector resulting from the forward simulation, using a metric that incorporates characters ie: proximity to obstacles, to the goal, to the global path, and speed. Discard illegal trajectories (ones that collide with obstacles)  
+- pick the highest scoring trajectory and send the associated velocity to the mobile base  
+- this DWA planner depends on the local costmap which provides obstacle information  
+- it's important to well tune the parameters  
+
+__Costmaps__:
+Two types of costmaps -  
+1. global_costmap_params.yaml: only considers static obstacles    
+2. local_costmap_params.yaml: used by the local path planner, contains additional information  
+
+### Tuning the Simulation Time of the DWA Algorithm  
+__DWA Parameters__:  
+- simulation time: time allowed for the robot to move with the sampled velocities  
+-takes the velocity samples in robot's control space, and examines the circular trajectories represented by those velocity samples, and finally eliminates bad velocities  
+- high simulation time (>=5) lead to heavier computations, but get longer paths  
+- low simulation times (<=2) have limited performance (esp when the robot needs to pass a narrow doorway) because there is insufficient time to obtain the optimal trajectory that will actually go through the narrow doorway.  
+- recommended to choose a simulation time between __3 and 5__   
+
+#### How to run the Live Demo
+1. Open the DWA Config file: `$ roscd turtlebot3_navigation/param`. The files are located in `/opt/ros/kinetic/share/turtlebot3_navigation/param`. There are different dwa configurations for different turtlebot3 models (waffle, burger, etc). Make any changes to the simulation time to adjust the parameters.
+2. Start the Turtlebot3 Gazebo Simulator: `$ roslaunch turtlebot3_gazebo turtlebot3_house.launch`      
+3. load the navigation stack `$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/home/skylar/tb3_house_map.yaml
+`
+
+The length of the local path planner is different when the simulation time is changed. Therefore, the question is, whether the robot should navigate closer to the local trajectory that takes into account dynamic obstacles or navigate closer to the path that is the shortest path to the goal navigation.  
+
+### DWA Trajectory Scoring  
+cost = path_distance_bias * (distance(m) to path from the endpoint of the trajectory) +  
+goal_distance_bias * (distance(m) to local goal from the endpoint of the trajectory) +  
+occdist_scale * (maximum obstacle cost along the trajectory in obstacle cost (0-254))  
+
+__path_distance_bias__: helps penalize trajectory far from the global path  
+- higher values of this parameter makes the robot select local trajectories closer to the global path  
+__goal_distance_bias__: penalizes trajectory far from the goal location  
+- increasing the goal distance bias makes the robot select trajectory closer to the goal and may be far from the global path  
+__occdist_scale__: occulsion distance scale factor helps selecting trajectories far from obstacles  
+- increasing the value will make the robot select paths far from obstacles, but too high values will make the robot stuck because the robot will think it is constantly close to obstacles  
+
+__Trajectory Scoring__:  
+- p_dist: path distance bias is the weight for how much the local planner should stay close to the global path  
+- g_dist: goal distance bias is the weight for how much the robot should attempt to reach the local goal, with whatever path  
+- occdist: scale is the weight for how much the robot should attempt to avoid obstacles (too high value = indecisize robot)  
+- ex; path distance bias to 32.0, goal distance bias to 20.0, occdist sclae to 0.02  
+
+### Trajectory Scoring Tuning:
+To view the dwa algortihm with the biases:  
+1. Start roscore  
+2. `$ roscd turtlebot3_navigation/param`  
+3. `$ cat dwa_local_planner_params_waffle.yaml` or cat any of the other yaml files with 'dwa' in the name. In our case, the Trajectory Scoring Parameters for dwa_local_planner_params_waffle.yaml is the following:  
+```
+# Trajectory Scoring Parameters
+  path_distance_bias: 32.0
+  goal_distance_bias: 20.0
+  occdist_scale: 0.02
+  forward_point_distance: 0.325
+  stop_time_buffer: 0.2
+  scaling_speed: 0.25
+  max_scaling_factor: 0.2
+```
+This tells us: the DWA algorithm is configured to give more weight to stay closer to the global path and less weight for managing to select paths closer to the goal. The occulusion scale of 0.02 tells us that the robot tries slightly to navigate away from obstacles.  
+
+__Editing the Parameters:__  
+1. change it directly on the yaml file  
+2. access the parameter values through the parameter server using rqt_reconfigure utility which allows to access all the parameters in ROS from the parameter server and allows you to change them dynamically without having to change the config file: `$ rosrun rqt reconfigure rqt_reconfigure`
+
+
+
+
+
+
+
+
+
+
+
 
 
